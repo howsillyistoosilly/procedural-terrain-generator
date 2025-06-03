@@ -1,40 +1,88 @@
-using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class PerlinScript : MonoBehaviour
+public class MeshGenerator : MonoBehaviour
 {
-    public int width = 256;
-    public int height = 256;
-    public float scale = 20f;
-    private void Update()
+    Mesh mesh;
+
+    Vector3[] vertices;
+    int[] triangles;
+
+    public int xSize = 20;
+    public int zSize = 20;
+    float offsetX;
+    float offsetZ;
+    public float strength = 0.3f;
+
+    void Start()
     {
-        Renderer renderer = GetComponent<Renderer>();
-        renderer.material.mainTexture = GenerateTexture();
+        offsetX = Random.Range(0f, 9999f);
+        offsetZ = Random.Range(0f, 9999f);
+        
+
+        mesh = new Mesh();
+        GetComponent<MeshFilter>().mesh = mesh;
+
+        CreateShape();
+        UpdateMesh();
+        GetComponent<MeshCollider>().sharedMesh = mesh;
     }
 
-    Texture2D GenerateTexture()
+    void CreateShape()
     {
-        Texture2D texture = new Texture2D(width, height);
-        for (int x = 0; x < width; x++)
+        vertices = new Vector3[(xSize + 1) * (zSize + 1)];
+	
+
+        for (int i = 0, z = 0; z <= zSize; z++)
         {
-            for (int y = 0; y < height; y++)
+            for (int x = 0; x <= xSize; x++)
             {
-                Color color = CalculateColor(x, y);
-                texture.SetPixel(x, y, color);
+                float y = Mathf.PerlinNoise((x * strength) + offsetX, (z * strength) + offsetZ) * 2f;
+                vertices[i] = new Vector3(x, y, z);
+                i++;
             }
         }
 
-        texture.Apply();
-        return texture;
+        triangles = new int[xSize * zSize * 6];
+
+        int vert = 0;
+        int tris = 0;
+
+        for (int z = 0; z < zSize; z++)
+        {
+            for (int x = 0; x < xSize; x++)
+            {
+                triangles[tris + 0] = vert + 0;
+                triangles[tris + 1] = vert + xSize + 1;
+                triangles[tris + 2] = vert + 1;
+                triangles[tris + 3] = vert + 1;
+                triangles[tris + 4] = vert + xSize + 1;
+                triangles[tris + 5] = vert + xSize + 2;
+
+                vert++;
+                tris += 6;
+            }
+            vert++;
+        }
     }
 
-    Color CalculateColor(int x, int y)
-        {
-            float xCoord = (float)x / width * scale;
-            float yCoord = (float)y / height * scale;
-           float sample = Mathf.PerlinNoise(xCoord, yCoord);
-           return new Color(sample, sample, sample);
-        }
+    void UpdateMesh()
+    {
+        mesh.Clear();
+
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+
+        mesh.RecalculateNormals();
+        
         
     }
+    public Vector3 GetCenterPosition()
+    {
+        float centerX = xSize / 2f;
+        float centerZ = zSize / 2f;
 
+        return new Vector3(centerX, 20, centerZ);
+    }
+}
