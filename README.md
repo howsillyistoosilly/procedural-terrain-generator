@@ -17,8 +17,8 @@ Handles basic movement of player (cube as of now)
 <p>Attached pdf : those are my personal notes for anyone who wants to learn more before diving into it personally ( do ignore some self talk my note taking habit is quite funny)</p>
 
 <ol>
-  Planned Additions for the future
-  Detailed movement mechanics
-  Different terrains (Hills and Water)
-  More optimisations
+  <li>Planned Additions for the future</li>
+  <li>Detailed movement mechanics</li>
+  <li>Different terrains (Hills and Water)</li>
+  <li>More optimisations</li>
 </ol>
